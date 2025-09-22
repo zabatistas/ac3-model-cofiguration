@@ -1,0 +1,76 @@
+apiVersion: apps/v1
+labels:
+  app: springboot
+  annotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/path: "/actuator/prometheus"
+    prometheus.io/port: "8080"
+spec:
+  containers:
+    - name: springboot
+      image: REPLACE_ME_REGISTRY/your-app:REPLACE_ME_TAG
+      imagePullPolicy: IfNotPresent
+      ports:
+        - containerPort: 8080
+      readinessProbe:
+        httpGet:
+          path: /actuator/health
+          port: 8080
+        initialDelaySeconds: 10
+        periodSeconds: 10
+        failureThreshold: 3
+      livenessProbe:
+        httpGet:
+          path: /actuator/health
+          port: 8080
+        initialDelaySeconds: 30
+        periodSeconds: 20
+        failureThreshold: 5
+      resources:
+        requests:
+          cpu: "200m"
+          memory: "256Mi"
+        limits:
+          cpu: "1000m"
+          memory: "1Gi"
+      envFrom:
+        - configMapRef:
+            name: spring-config
+  imagePullSecrets:
+    - name: regcred
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: springboot-svc
+  namespace: app
+  labels:
+    app: springboot
+spec:
+  ports:
+    - port: 8080
+      targetPort: 8080
+      name: http
+  selector:
+    app: springboot
+  type: ClusterIP
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: springboot-hpa
+  namespace: app
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: springboot-app
+  minReplicas: 2
+  maxReplicas: 10
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 60
