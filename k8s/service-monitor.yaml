@@ -2,7 +2,7 @@ apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
   name: springboot-servicemonitor
-  namespace: monitoring
+  namespace: newmonitoring
   labels:
     release: prometheus
 spec:

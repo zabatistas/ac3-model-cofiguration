@@ -9,9 +9,9 @@ prometheus:
     retention: 15d
     # Use shard/fanout remote_write as needed
     remoteWrite:
-      - url: "${THANOS_REMOTE_WRITE_URL}" # Helm cannot expand env here; we'll show example using secret below
+      - url: "http://82.223.13.241:10908/api/v1/receive"
     # If your Thanos receiver requires auth via bearer token, set basicAuth/bearerToken config
-    bearerToken: /etc/prometheus/secrets/thanos-remote-write/THAOS_REMOTE_WRITE_BEARER_TOKEN
+    # bearerToken: /etc/prometheus/secrets/thanos-remote-write/THAOS_REMOTE_WRITE_BEARER_TOKEN
     # If TLS config required, you can add tls_config here
 
   # serviceMonitorSelector, so ServiceMonitors with matching labels are discovered
@@ -52,8 +52,8 @@ blackboxExporter:
 # If you want additional scrape_config for blackbox probing remote endpoints, define them here
 
 # Configure remote write secret as a Kubernetes Secret mounted into Prometheus server
-extraSecrets:
-  - thanos-remote-write
+# extraSecrets:
+#   - thanos-remote-write
 
 # Mount the secret and make Prometheus server read it
 serverFiles:
@@ -63,9 +63,9 @@ serverFiles:
 # RBAC and CRDs are usually installed by the chart. If your cluster prohibits automatic CRD installation, install CRDs first.
 
 # Grafana is optional — disabled here but feel free to enable
-grafana:
-  enabled: true
-  adminPassword: "REPLACE_ME_GRAFANA_PASSWORD"
+# grafana:
+#   enabled: true
+#   adminPassword: "REPLACE_ME_GRAFANA_PASSWORD"
   # Provide dashboards if desired
 
 # Set resource requests/limits according to your cluster
