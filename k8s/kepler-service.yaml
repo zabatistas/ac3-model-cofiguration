@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: kepler-exporter
+  namespace: newmonitoring
+  labels:
+    app: kepler-exporter
+spec:
+  clusterIP: None
+  selector:
+    app: kepler-exporter
+  ports:
+  - name: http
+    port: 9102
+    targetPort: 9102
+    protocol: TCP

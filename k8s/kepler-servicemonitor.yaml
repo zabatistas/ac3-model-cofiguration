@@ -1,0 +1,28 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: kepler-servicemonitor
+  namespace: newmonitoring
+  labels:
+    app: kepler-exporter
+    release: prometheus
+spec:
+  selector:
+    matchLabels:
+      app: kepler-exporter
+  namespaceSelector:
+    matchNames:
+      - newmonitoring
+  endpoints:
+    - port: http
+      interval: 30s
+      path: /metrics
+      scheme: http
+      honorLabels: true
+      relabelings:
+        - sourceLabels: [__meta_kubernetes_pod_node_name]
+          targetLabel: instance
+        - sourceLabels: [__meta_kubernetes_pod_name]
+          targetLabel: pod
+        - sourceLabels: [__meta_kubernetes_namespace]
+          targetLabel: namespace

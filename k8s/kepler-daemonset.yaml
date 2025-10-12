@@ -1,0 +1,139 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: kepler-exporter
+  namespace: newmonitoring
+  labels:
+    app: kepler-exporter
+spec:
+  selector:
+    matchLabels:
+      app: kepler-exporter
+  template:
+    metadata:
+      labels:
+        app: kepler-exporter
+    spec:
+      hostNetwork: true
+      hostPID: true
+      serviceAccountName: kepler-sa
+      containers:
+      - name: kepler-exporter
+        image: quay.io/sustainable_computing_io/kepler:latest
+        imagePullPolicy: Always
+        securityContext:
+          privileged: true
+        command:
+        - /usr/bin/kepler
+        - -address=0.0.0.0:9102
+        - -enable-gpu=true
+        - -v=1
+        ports:
+        - containerPort: 9102
+          hostPort: 9102
+          name: http
+          protocol: TCP
+        livenessProbe:
+          failureThreshold: 5
+          httpGet:
+            path: /healthz
+            port: 9102
+            scheme: HTTP
+          periodSeconds: 60
+          successThreshold: 1
+          timeoutSeconds: 10
+        readinessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: /healthz
+            port: 9102
+            scheme: HTTP
+          periodSeconds: 5
+          successThreshold: 1
+          timeoutSeconds: 10
+        resources:
+          requests:
+            cpu: 100m
+            memory: 400Mi
+          limits:
+            cpu: 1000m
+            memory: 500Mi
+        volumeMounts:
+        - name: lib-modules
+          mountPath: /lib/modules
+          readOnly: true
+        - name: usr-src
+          mountPath: /usr/src
+          readOnly: true
+        - name: proc
+          mountPath: /proc
+          readOnly: true
+        - name: sys
+          mountPath: /sys
+          readOnly: true
+        - name: tracing
+          mountPath: /sys/kernel/tracing
+          readOnly: true
+        env:
+        - name: NODE_IP
+          valueFrom:
+            fieldRef:
+              fieldPath: status.hostIP
+        - name: NODE_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: spec.nodeName
+      tolerations:
+      - effect: NoSchedule
+        operator: Exists
+      - effect: NoExecute
+        operator: Exists
+      volumes:
+      - name: lib-modules
+        hostPath:
+          path: /lib/modules
+          type: Directory
+      - name: usr-src
+        hostPath:
+          path: /usr/src
+          type: Directory
+      - name: proc
+        hostPath:
+          path: /proc
+          type: Directory
+      - name: sys
+        hostPath:
+          path: /sys
+          type: Directory
+      - name: tracing
+        hostPath:
+          path: /sys/kernel/tracing
+          type: Directory
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: kepler-sa
+  namespace: newmonitoring
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: kepler-clusterrole
+rules:
+- apiGroups: [""]
+  resources: ["nodes/metrics", "nodes/proxy", "nodes/stats", "services", "endpoints", "pods"]
+  verbs: ["get", "list", "watch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: kepler-clusterrolebinding
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: kepler-clusterrole
+subjects:
+- kind: ServiceAccount
+  name: kepler-sa
+  namespace: newmonitoring
