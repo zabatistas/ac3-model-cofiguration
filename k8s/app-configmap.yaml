@@ -5,8 +5,12 @@ metadata:
   namespace: app
 data:
   application.properties: |
+    spring.application.name=exampleconfig
     server.port=8080
-    management.endpoints.web.exposure.include=health,info,prometheus
+    server.address=0.0.0.0
+    management.endpoints.web.exposure.include=*
     management.endpoint.health.show-details=always
+    management.health.probes.enabled=true
+    management.server.port=8080
     management.metrics.export.prometheus.enabled=true
     management.endpoints.web.base-path=/actuator
