@@ -10,6 +10,15 @@ prometheus:
     # Use shard/fanout remote_write as needed
     remoteWrite:
       - url: "http://82.223.13.241:10908/api/v1/receive"
+        writeRelabelConfigs:
+          - sourceLabels: ['__address__']
+            regex: '.*'
+            targetLabel: 'application_id'
+            replacement: 'exampleconfig'
+          - sourceLabels: ['__address__']
+            regex: '.*'
+            targetLabel: 'cluster_id'
+            replacement: 'REPLACE_WITH_YOUR_CLOUD_PROVIDER'  # e.g., "aws", "azure", "gcp", "on-premise"
     # If your Thanos receiver requires auth via bearer token, set basicAuth/bearerToken config
     # bearerToken: /etc/prometheus/secrets/thanos-remote-write/THAOS_REMOTE_WRITE_BEARER_TOKEN
     # If TLS config required, you can add tls_config here
