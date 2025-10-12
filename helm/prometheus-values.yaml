@@ -2,6 +2,10 @@
 # Enables node-exporter, kube-state-metrics, and blackbox-exporter
 # Configures Prometheus remote_write to Thanos Receiver
 
+# Global namespace configuration
+namespaceOverride: "newmonitoring"
+fullnameOverride: "newmon-prometheus"
+
 prometheus:
   prometheusSpec:
     # Tune retention, volume, replicas as required
@@ -29,6 +33,7 @@ prometheus:
   serviceMonitorNamespaceSelector:
     matchNames:
       - app
+      - newmonitoring
 
   podMonitorSelector: {}
 

@@ -11,7 +11,7 @@ COPY src ./src
 
 
 # Use Maven to build a packaged jar (skip tests for speed; remove -DskipTests=false if you want tests)
-RUN --mount=type=cache,target=/root/.m2 \
+RUN target=/root/.m2 \
 mvn -B -f pom.xml -DskipTests package
 
 

@@ -114,7 +114,7 @@ kubectl apply -f k8s/service-monitor.yaml
 kubectl get pods -n newmonitoring
 
 # Port forward to access Prometheus UI
-kubectl port-forward -n newmonitoring svc/prometheus-kube-prometheus-prometheus 9090:9090
+kubectl port-forward -n newmonitoring svc/newmon-prometheus-prometheus 9090:9090
 
 # Access Prometheus at http://localhost:9090
 # Check if your application metrics are being scraped

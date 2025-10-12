@@ -4,7 +4,7 @@ metadata:
   name: springboot-servicemonitor
   namespace: newmonitoring
   labels:
-    release: prometheus
+    release: newmon-prometheus
 spec:
   selector:
     matchLabels:
