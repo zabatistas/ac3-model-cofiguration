@@ -13,7 +13,6 @@ This project provides a comprehensive monitoring and configuration solution for 
 ### Monitoring Stack
 - **Prometheus**: Metrics collection and storage
 - **Grafana**: Visualization and dashboards
-- **Thanos**: Long-term metrics storage and federation
 - **Kepler**: Kubernetes power consumption monitoring
 
 ## Prerequisites
@@ -76,16 +75,7 @@ helm install prometheus-stack prometheus-community/kube-prometheus-stack \
   --namespace monitoring --create-namespace
 ```
 
-#### Step 2: Deploy Thanos (Long-term Storage)
-
-```bash
-# Deploy Thanos components
-kubectl apply -f k8s/thanos-receive.yaml
-kubectl apply -f k8s/thanos-query.yaml
-kubectl apply -f k8s/thanos-store.yaml
-```
-
-#### Step 3: Deploy Kepler Power Monitoring
+#### Step 2: Deploy Kepler Power Monitoring
 
 ```bash
 # Create monitoring namespace for Kepler
@@ -97,7 +87,7 @@ kubectl apply -f k8s/kepler-service.yaml
 kubectl apply -f k8s/kepler-servicemonitor.yaml
 ```
 
-#### Step 4: Deploy Application
+#### Step 3: Deploy Application
 
 ```bash
 # Deploy the Spring Boot application
@@ -153,7 +143,6 @@ Access Grafana at http://localhost:3000 (or your configured ingress):
 - **Application Dashboard**: Spring Boot metrics and health
 - **Kubernetes Cluster Overview**: Node and pod status
 - **Power Consumption Dashboard**: Energy usage and efficiency metrics
-- **Thanos Query Dashboard**: Long-term metrics analysis
 
 **Importing Additional Dashboards:**
 ```bash
@@ -186,7 +175,7 @@ server.address=0.0.0.0
 **Prometheus Configuration:**
 - `helm/prometheus-values.yaml`: Prometheus Helm values
 - Service discovery for both `monitoring` and `newmonitoring` namespaces
-- Retention: 15 days local, long-term via Thanos
+- Retention: 15 days local storage
 
 **Kepler Configuration:**
 - Runs as DaemonSet on all nodes
@@ -286,19 +275,18 @@ kubectl logs -n newmonitoring -l app=kepler-exporter
 
 ### High Availability
 - Prometheus configured with multiple replicas
-- Thanos provides federated querying and long-term storage
 - Application can be scaled horizontally
 
 ## Maintenance
 
 ### Regular Tasks
-- Monitor disk usage for Prometheus and Thanos storage
+- Monitor disk usage for Prometheus storage
 - Review and update Grafana dashboards
 - Check Kepler power consumption accuracy
 - Update Helm charts and container images
 
 ### Backup Strategy
-- Prometheus data: Backed up via Thanos to object storage
+- Prometheus data: Regular snapshots of local storage
 - Grafana dashboards: Version controlled as JSON
 - Application configuration: Stored in Git
 
@@ -314,7 +302,7 @@ kubectl logs -n newmonitoring -l app=kepler-exporter
 - Set up alerting for critical metrics
 - Monitor power efficiency trends with Kepler
 - Regularly review and optimize resource usage
-- Use Thanos for long-term capacity planning
+- Plan capacity based on local Prometheus metrics
    kubectl describe pod -n app -l app=springboot
    ```
 
